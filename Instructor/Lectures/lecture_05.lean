@@ -118,7 +118,7 @@ as a polymorphic function that, given any three types,
 α, β, and γ, takes two functions, *g : β → γ* and *f :
 α → β* along with any argument *a : α* and that returns 
 *(g (f a))*, which we now understand to be *(g ∘ f) a*.
--/ 
+-/
 
 def glue_funs {α β γ : Type} :
   (β → γ) →   -- type of g
@@ -128,13 +128,54 @@ def glue_funs {α β γ : Type} :
 | g, f, a => g (f a)
 
 /-!
-Now, just as with *apply2*, if we leave off the third
-argument, *a*, to *glue_funs*, we will get back exactly 
-*(g ∘ f)*. That is, we'll get the function that, when 
-applied to some argument, *a,* will return *(g (f a)).* 
-What function does that? It's just *(g ∘ f)*.  
+Let's see an easy example. In this example,
+- α is String
+- β is Nat
+- γ is Bool
 -/
 
+-- We need a function f : String → Nat
+def len : String → Nat := String.length
+#check (len)           -- String → Nat
+
+-- We need a function of type Nat → Bool 
+def ev (n : Nat) : Bool := n%2=0
+#check (ev)             -- Nat → Bool
+
+-- glue_funs composes ev and len into a String → Bool function! 
+#eval glue_funs ev len "Hello"    -- expect false
+-- Remember application is left associative
+#eval (glue_funs ev len) "Hello" -- expect false
+-- (glue_funs ev len) is the function we want!
+#check (glue_funs ev len)     -- String → Bool
+-- Applied to a String it gives back a Bool!
+#eval (glue_funs ev len) "Hello!" -- expect true
+ 
+-- We can even name this function then use it.
+def ev_string := (glue_funs ev len)
+#eval ev_string "Hi!"   -- expect false
+#eval ev_string "Hello" -- expect false
+#eval ev_string ""      -- expect true
+#eval ev_string "I Love Logic"  -- true
+
+/-!
+Wow. So glue_funs is in essence a function
+for *gluing together* two functions into a 
+new function, where the input of one is the
+output of the other, given a value to which
+the whole thing is applied.  
+-/
+
+
+/-!
+Recall that just as with *apply2*, leaving off the third
+argument, *a*, to *glue_funs*, we will return exactly the
+function, *(g ∘ f)*. That is, we'll get the function that, 
+when applied to an argument, *(a : α),* return *(g (f a)).* 
+What function does that? It's just *(g ∘ f)*. Pronounce 
+this function as *g after f*. The idea is that it applies
+*g* after (to the result of) applying *f* to *a*.  
+-/
 #eval glue_funs square double 4   -- expect 64
 
 -- Apply glue_funs to first two arguments
@@ -294,14 +335,42 @@ to write the function that this compose function is to return.
 /-!
 ## Extra, extra!
 Did you know that Java and Python support lambda expressions?
-Challenge: Write the compose function in Python and then use it to
-replicate some of the concrete examples in this chapter. You will 
-be a far better programmer for having done this. 
+In this section, we'll show you, and present implementations of
+our apply2 and compose functions in Python. You will now see how 
+to program with higher-order functions in Python. You will also
+know what we mean when we say that you can expect to be able to 
+do so in many other capable languages, as well. You can run the
+following code in the VSCode container for this class.
 
-Lambda expressions, or *lambdas* as you'll hear them called, 
-are used all over the place, especially in graphical user interface
-code. For example, you can store a *lambda* (a function!) as a data
-member inside a button object, so that when the user presses the 
-button, that function is run to carry out a given task. Hint: Use
-a generative AI to explore these ideas in Python.
+```Python
+# Here's an ordinary definition of a squaring function
+def square(x) : return(x**2)
+print(square(5))                # expect 25
+
+# Here's square defined with a Python lambda expression
+square = lambda x : x**2
+print(square(5))                # Expect: 25
+
+# Here we apply an unnamed lambda to 6; expect 36 
+print((lambda x : x**2)(6))
+
+# Here's apply2 in Python, where f is a function argument
+def apply2(f) :
+    return lambda x : f(f(x))
+
+# Here we use apply2 to apply a cubing function twice to 2
+print(apply2(lambda x: x**3)(2))  # Expect (2^3)^3 = 512
+
+# Here is a general compose in Python; g and f are functions 
+def compose(g,f) :
+    return (lambda a : g(f(a)))
+
+# Here's an example of its use; understand this code
+cube_after_square = compose((lambda x : x**3),(lambda x : x**2))
+print(square_after_cube(3))         # Expect (3^2)^3 = 729
+```
+The programming and reasoning principles you learn in 
+Discrete Math and Theory will prove exceptionally valuable 
+to you no matter what languages you are ultimately asked 
+to use for everyday programming. 
 -/
