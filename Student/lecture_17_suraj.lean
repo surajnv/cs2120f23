@@ -41,7 +41,7 @@ def from_false_true_is_false (p : False) : True = False := False.elim p
 -- no elimination rule
 
 def proof_of_true : True := True.intro
-def false_implies_true : False \to True := \lambda f => _ true.intro
+def false_implies_true : False → True := λ f => _ True.intro
 
 /-!
 Prod ==> And
@@ -96,7 +96,7 @@ Sum ==> Or
 
 #check Sum
 
-/-! 
+/-!
 inductinve Sum (\alpha : Type u) (\beta : Type v) where
     | inl (val : \lapha) : Sum \alpha \beta
     | inr (val : \beta) : Sum \alpha \beta
