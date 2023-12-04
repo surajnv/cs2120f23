@@ -79,7 +79,7 @@ We can now form any likes proposition using this proposition builder.
 Moreover, we can state and prove propositions about dogs liking each other.
 -/
 
-example : likes rover iris := _             -- oops, no proof of this
+-- example : likes rover iris := _             -- oops, no proof of this
 example : ¬ likes rover iris := λ h => nomatch h  -- ok that's provable
 example : likes iris rover := ilr           -- yep, there's a proof
 example : likes rover fido ∧ likes iris rover := ⟨ rlf, ilr ⟩ --true!
@@ -117,10 +117,20 @@ formal proof of it, and briefly explain in English how you
 proved it.
 -/
 
-example : ∃ n, square n 4 := Exists.intro 2 (_) -- fill in _
+example : ∃ n, square n 4 := Exists.intro 2 (sqr 2 4 rfl) -- fill in _
 
 /-
 English language translation of propostion here:
+
+To prove that there exits n that satisfies the proposition that
+square n 4 is true (that is, n squared equals 4), we need a value
+of n that satisfies this proposition and a proof that this value
+of n, when squared, equals 4. The witness value of n that satisifies
+this proposition is 2, and we prove that this value works by using
+the reflixive property of the equality relation to say that 4 = 2^2.
+Thus, 2 is our witness and sqr 2 4 rfl is our proof that the square
+of 2 equals 4.
+
 -/
 
 /-!
@@ -192,7 +202,7 @@ a corresponding String value. Lean natively lacks a rule
 for performing such *coercions*.
 -/
 
-#check Eq 1 "Hi"
+ -- #check Eq 1 "Hi" -- won't work!!
 
 /-!
 ### Formal Definition of Equality Relation(s) in Lean
@@ -451,9 +461,10 @@ write separate tactic applications indented on separate lines.
 -/
 
 theorem eq_rel_trans {α : Type} {a b c : α} :
-_               -- fill with proposition: equality is transitive
-| _, _ => by
-  _             -- fill in your proof of it here
+a = b → b = c → a = c               -- fill with proposition: equality is transitive
+| aeqb , beqc => by
+  rw [aeqb]
+  rw [beqc]             -- fill in your proof of it here
 
 /-!
 ## Exam Question #3
@@ -468,3 +479,10 @@ is not.
 -/
 
 -- Your answer here
+
+inductive successor_pair : Prod Nat Nat → Prop
+| sp (a sa : Nat) : sa = Nat.succ a → successor_pair (a, sa)
+
+open successor_pair
+example : successor_pair (2,3) := sp 2 3 rfl
+example : ¬ successor_pair (2,4) := λ h => nomatch h
